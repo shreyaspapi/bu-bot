@@ -32,7 +32,6 @@ async def on_message(msg):
   ctx = await bot.get_context(msg)
   if not ctx.valid and ctx.prefix == prefix: await ctx.invoke(reply)
   elif ctx.command: await ctx.invoke(ctx.command)
-  else: pass
 
 
 ''' Commands '''
@@ -79,18 +78,15 @@ def create_embed(reply_to, reply):
   em.color = 0x44BFC1
   em.timestamp = reply.created_at
 
-  if attached and reply_msg:
+  if (not attached and reply_msg and reply_to.clean_content
+      or not attached and not embeds and reply_msg): em.add_field(name='Original Message',value='[{0.clean_content}]({0.jump_url})'.format(reply_to),inline=False)
+  elif not attached and reply_msg: em.add_field(name='Original Message',value='[Embedded content]({0.jump_url})'.format(reply_to),inline=False)
+  elif reply_msg:
     em.add_field(name='Original Message',value='[Embedded content]({0.jump_url})'.format(reply_to),inline=False)
     for ext in ['.jpg','.jpeg','.png','.gif']:
       if attached[0].url.endswith(ext): em.set_image(url=attached[0].url); break
     else:
       for f in attached: em.add_field(name='Attached file', value='{0.url}'.format(f))
-  elif embeds and reply_msg:
-    if reply_to.clean_content: em.add_field(name='Original Message',value='[{0.clean_content}]({0.jump_url})'.format(reply_to),inline=False)
-    else: em.add_field(name='Original Message',value='[Embedded content]({0.jump_url})'.format(reply_to),inline=False)
-  elif reply_msg: em.add_field(name='Original Message',value='[{0.clean_content}]({0.jump_url})'.format(reply_to),inline=False)
-  else: pass
-
   em.add_field(name='Reply',value='[{0}]({1.jump_url})'.format(reply_msg,reply),inline=False)
   em.set_footer(text='Click the links to jump to the messages')
   return em
