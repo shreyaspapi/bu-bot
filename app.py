@@ -89,10 +89,8 @@ def invite_submit():
         f = request.files['file']
     if '.xlsx' not in f.filename or '.xls' not in f.filename: return redirect(url_for('invite/error'))
     df = pd.read_excel(f.filename,engine='xlrd' )
-    data = []
     name,roll,batch,netID,rep,year = df['Name'],df['Roll'],df['Batch'],df['NetID'],df['Rep'],df['Year']
-    for i in range(len(name)):
-        data.append({
+    data = [{
             'name': name[i], 
             'roll': roll[i], 
             'year': int(year[i]), 
@@ -107,7 +105,7 @@ def invite_submit():
             'discord_uid': '', 
             'nickname': '', 
             'enrolled': True
-        })
+        } for i in range(len(name))]
     with open(STUD_FILE,'w') as f: json.dump(data,f)
     sent = mgmt_bot('add_to_server') # ERROR: No async-await in flask
     if sent: return redirect(url_for('invite', msg='success'))
